@@ -20,17 +20,7 @@ describe("Banking", function () {
     return { banking, owner, otherAccount };
   }
 
-  // it("Add Organisation", async function () {
-  //   const { donate } = await loadFixture(deployDonateFixture);
-  //   console.log(
-  //     await donate.addOrganisation(
-  //       "EricaOrg",
-  //       "0xbF85887b87d3f90Bf535C225f9c24C62a211Fb29"
-  //     )
-  //   );
-  // });
-
-  it("Generate address and store account details", async function () {
+  it("Store first account details", async function () {
     const { banking } = await loadFixture(deployBankingFixture);
     // const address = await ethers.
 
@@ -42,9 +32,27 @@ describe("Banking", function () {
         "Ghana",
         "14 Chad Street",
         "GHS",
-        300,
+        500,
         "0x4bdA3a7F53453d0B2B1070D856D4D7Ba248F98b8",
         "1848395939393"
+      )
+    );
+  });
+
+  it("Store second account details", async function () {
+    const { banking } = await loadFixture(deployBankingFixture);
+  
+    expect(
+      await banking.storeData(
+        "Team Fortrix Genesis",
+        "genesisx@gmail.com",
+        "+2348102433987",
+        "Nigeria",
+        "23 Weststreet",
+        "NGN",
+        3000,
+        "0xbF85887b87d3f90Bf535C225f9c24C62a211Fb29",
+        "1848395939583"
       )
     );
   });
@@ -54,4 +62,23 @@ describe("Banking", function () {
 
     expect(await banking.getAccountAddress('1848395939393')).to.be.properAddress;
   })
+
+  it("Get account number's balance",async function(){
+    const {banking} = await loadFixture(deployBankingFixture);
+
+    expect(await banking.getAccountBalance('1848395939393'));
+  })
+
+  it("Withdraw from account",async function(){
+    const {banking} = await loadFixture(deployBankingFixture);
+
+    expect(await banking.withdraw('1848395939393',100));
+  })
+
+  it("Deposit into account",async function(){
+    const {banking} = await loadFixture(deployBankingFixture);
+
+    expect(await banking.deposit('1848395939583',100));
+  })
+
 });

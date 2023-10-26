@@ -2,8 +2,7 @@
 pragma solidity ^0.8.20;
 
 // Uncomment this line to use console.log
-// import "hardhat/console.sol";
-// import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
+import "hardhat/console.sol";
 
 contract Banking {
     // User details
@@ -69,30 +68,73 @@ contract Banking {
         return true;
     }
 
-    // getAccount
-    function getAccountAddress(string memory _accNum) public view returns (address) {
+    // events
+    error LowBalance(uint256 toSend, uint256 balance);
+    error WithdrawalError(uint256 balance);
+    event Transferred(address from, address to, uint amount);
+
+    // getAccountNumber's address
+    function getAccountAddress(
+        string memory _accNum
+    ) public view returns (address) {
         return accounts[_accNum].addr;
     }
 
-    // function localTransfer(address sender, address receiver,uint256 amount) public {
-    //     require(msg.sender);
-    // }
+    // getAccountNumber's address
+    function getAccountBalance(
+        string memory _accNum
+    ) public view returns (uint256) {
+        return accounts[_accNum].balance;
+    }
+
+    // withdraw from account
+    function withdraw(
+        string memory _accNum,
+        uint256 _amount
+    ) public returns (bool) {
+        Accounts storage account = accounts[_accNum];
+        unchecked {
+            account.balance -= _amount;
+            if (account.balance <= _amount) {
+                revert WithdrawalError(account.balance);
+            }
+        }
+        return true;
+    }
+
+    // deposit amount to account
+    function deposit(
+        string memory _accNum,
+        uint256 _amount
+    ) public returns (bool) {
+        Accounts storage account = accounts[_accNum];
+        account.balance += _amount;
+        return true;
+    }
+
+    // make a transfer
+    function transfer(
+        string memory _sender,
+        string memory _receiver,
+        uint256 _amount
+    ) public {
+        // get sender account balance
+        uint256 accBalance = getAccountBalance(_sender);
+
+        // check if amount to be sent is more than sender's balance
+        if (_amount > accBalance) {
+            // return an error if balance is lower than sending
+            revert LowBalance({toSend: _amount, balance: accBalance});
+        } else {
+            if (withdraw(_sender, _amount)) {
+                if (deposit(_receiver, _amount)) {
+                    emit Transferred(
+                        getAccountAddress(_sender),
+                        getAccountAddress(_sender),
+                        _amount
+                    );
+                }
+            }
+        }
+    }
 }
-
-// contract ABSAToken is ERC20 {
-//     address public owner;
-
-//     constructor() ERC20("ABSA Token", "ABSA") {
-//         owner = msg.sender;
-//     }
-
-//     // Add a restriction to only ABSA
-//     modifier onlyAbsa() {
-//         require(msg.sender == owner, "Restricted to ABSA only");
-//         _;
-//     }
-
-//     function mint(address to, uint256 amount) public onlyAbsa {
-//         _mint(to, amount);
-//     }
-// }
