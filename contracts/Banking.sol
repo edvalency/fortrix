@@ -5,6 +5,16 @@ pragma solidity ^0.8.20;
 import "hardhat/console.sol";
 
 contract Banking {
+    uint public unlockTime;
+
+    constructor(uint _unlockTime) {
+        require(
+            block.timestamp < _unlockTime,
+            "Unlock time should be in the future"
+        );
+        unlockTime = _unlockTime;
+    }
+
     // User details
     struct UserDetails {
         uint256 id;
@@ -64,7 +74,6 @@ contract Banking {
             balance: _balance
         });
         accountsIds.push(_accNum);
-
         return true;
     }
 
@@ -118,6 +127,7 @@ contract Banking {
         string memory _receiver,
         uint256 _amount
     ) public {
+        
         // get sender account balance
         uint256 accBalance = getAccountBalance(_sender);
 

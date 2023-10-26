@@ -11,11 +11,17 @@ describe("Banking", function () {
   // We use loadFixture to run this setup once, snapshot that state,
   // and reset Hardhat Network to that snapshot in every test.
   async function deployBankingFixture() {
+    const ONE_YEAR_IN_SECS = 365 * 24 * 60 * 60;
+    const ONE_GWEI = 1_000_000_000;
+
+    const lockedAmount = ONE_GWEI;
+    const unlockTime = (await time.latest()) + ONE_YEAR_IN_SECS;
+
     // Contracts are deployed using the first signer/account by default
     const [owner, otherAccount] = await ethers.getSigners();
 
     const Banking = await ethers.getContractFactory("Banking");
-    const banking = await Banking.deploy();
+    const banking = await Banking.deploy(unlockTime);
 
     return { banking, owner, otherAccount };
   }
@@ -66,19 +72,24 @@ describe("Banking", function () {
   it("Get account number's balance",async function(){
     const {banking} = await loadFixture(deployBankingFixture);
 
-    expect(await banking.getAccountBalance('1848395939393'));
+    expect(banking.getAccountBalance('1848395939393'));
   })
 
   it("Withdraw from account",async function(){
     const {banking} = await loadFixture(deployBankingFixture);
 
-    expect(await banking.withdraw('1848395939393',100));
+    expect(banking.withdraw('1848395939393',100));
   })
 
+  it("Withdraw from account with less balance",async function(){
+    const {banking} = await loadFixture(deployBankingFixture);
+
+    expect(banking.withdraw('1848395939393',5900));
+  })
   it("Deposit into account",async function(){
     const {banking} = await loadFixture(deployBankingFixture);
 
-    expect(await banking.deposit('1848395939583',100));
+    expect(banking.deposit('1848395939583',100));
   })
 
 });
