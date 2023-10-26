@@ -21,75 +21,47 @@ describe("Banking", function () {
     const [owner, otherAccount] = await ethers.getSigners();
 
     const Banking = await ethers.getContractFactory("Banking");
-    const banking = await Banking.deploy(unlockTime);
+    const banking = await Banking.deploy(unlockTime, owner, 900000000000);
 
     return { banking, owner, otherAccount };
   }
 
-  it("Store first account details", async function () {
-    const { banking } = await loadFixture(deployBankingFixture);
-    // const address = await ethers.
+  it("getContract balance", async function () {
+    const { banking, owner } = await loadFixture(deployBankingFixture);
+    expect(await banking.balanceOf(owner));
+  });
 
-    expect(
-      await banking.storeData(
-        "Team Fortrix",
-        "tfortrix@yahoo.com",
-        "0553798229",
-        "Ghana",
-        "14 Chad Street",
-        "GHS",
-        500,
-        "0x4bdA3a7F53453d0B2B1070D856D4D7Ba248F98b8",
-        "1848395939393"
-      )
+  it("Deposit to other account", async function () {
+    const { banking, otherAccount } = await loadFixture(deployBankingFixture);
+    expect(await banking.makeDeposit(otherAccount.address, 3000)).to.emit(
+      banking,
+      "Deposited"
     );
   });
 
-  it("Store second account details", async function () {
-    const { banking } = await loadFixture(deployBankingFixture);
+  it("transfer to address", async function () {
+    const { banking, owner, otherAccount } = await loadFixture(
+      deployBankingFixture
+    );
+    expect(
+      await banking.makeTransfer(owner, otherAccount.address, 100)
+    ).to.emit(banking, "Transferred");
+  });
+
+  it("check balance of address minted to", async function () {
+    const { banking, otherAccount } = await loadFixture(deployBankingFixture);
+    expect(await banking.balanceOf(otherAccount.address));
+  });
+
+  it("transfer more than account balance", async function () {
+    const { banking, owner, otherAccount } = await loadFixture(
+      deployBankingFixture
+    );
+    expect(
+      await banking.makeTransfer(otherAccount.address,owner, 100)
+    ).to.emit(banking, "LowBalance");
+  });
   
-    expect(
-      await banking.storeData(
-        "Team Fortrix Genesis",
-        "genesisx@gmail.com",
-        "+2348102433987",
-        "Nigeria",
-        "23 Weststreet",
-        "NGN",
-        3000,
-        "0xbF85887b87d3f90Bf535C225f9c24C62a211Fb29",
-        "1848395939583"
-      )
-    );
-  });
 
-  it("Get account number's address",async function(){
-    const {banking} = await loadFixture(deployBankingFixture);
-
-    expect(await banking.getAccountAddress('1848395939393')).to.be.properAddress;
-  })
-
-  it("Get account number's balance",async function(){
-    const {banking} = await loadFixture(deployBankingFixture);
-
-    expect(banking.getAccountBalance('1848395939393'));
-  })
-
-  it("Withdraw from account",async function(){
-    const {banking} = await loadFixture(deployBankingFixture);
-
-    expect(banking.withdraw('1848395939393',100));
-  })
-
-  it("Withdraw from account with less balance",async function(){
-    const {banking} = await loadFixture(deployBankingFixture);
-
-    expect(banking.withdraw('1848395939393',5900));
-  })
-  it("Deposit into account",async function(){
-    const {banking} = await loadFixture(deployBankingFixture);
-
-    expect(banking.deposit('1848395939583',100));
-  })
-
+  
 });
