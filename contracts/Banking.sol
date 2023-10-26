@@ -89,7 +89,7 @@ contract Banking {
         return accounts[_accNum].addr;
     }
 
-    // getAccountNumber's address
+    // getAccountNumber's balance
     function getAccountBalance(
         string memory _accNum
     ) public view returns (uint256) {
