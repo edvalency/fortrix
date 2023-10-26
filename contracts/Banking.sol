@@ -19,10 +19,10 @@ contract Banking is ERC20, Ownable {
         address owner,
         uint256 initialSupply
     ) public ERC20("ABSA Token", "ABSA") Ownable(owner) {
-        require(
-            block.timestamp < _unlockTime,
-            "Unlock time should be in the future"
-        );
+        // require(
+        //     block.timestamp < _unlockTime,
+        //     "Unlock time should be in the future"
+        // );
         unlockTime = _unlockTime;
         _mint(msg.sender, initialSupply);
         balances[msg.sender] = initialSupply;
@@ -50,18 +50,11 @@ contract Banking is ERC20, Ownable {
         return balances[_accNum];
     }
 
-    // withdraw from account
-    function makeWithdraw(address _accNum, uint256 _amount) public returns (bool) {
-        require(balances[_accNum] > _amount);
-        balances[_accNum] = balances[_accNum] - _amount;
-        return true;
-    }
-
-    // deposit amount to account
-    function makeDeposit(address _addr, uint256 _amount) public {
-        balances[_addr] = balances[_addr] + _amount;
-        emit Deposited(_addr, _amount);
-    }
+    // // deposit amount to account
+    // function makeDeposit(address _addr, uint256 _amount) public {
+    //     balances[_addr] = balances[_addr] + _amount;
+    //     emit Deposited(_addr, _amount);
+    // }
 
     // get accounts
 
@@ -83,10 +76,10 @@ contract Banking is ERC20, Ownable {
             // return an error if balance is lower than sending
             emit LowBalance({toSend: _amount, balance: accBalance});
         } else {
-            if (makeWithdraw(_sender, _amount)) {
-                    emit Transferred(_sender, _receiver, _amount);
-              
-            }
+            balances[_sender] = balances[_sender] - _amount;
+            balances[_receiver] = balances[_receiver] + _amount;
+
+            emit Transferred(_sender, _receiver, _amount);
         }
     }
 }

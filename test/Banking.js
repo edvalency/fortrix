@@ -32,10 +32,10 @@ describe("Banking", function () {
   });
 
   it("Deposit to other account", async function () {
-    const { banking, otherAccount } = await loadFixture(deployBankingFixture);
-    expect(await banking.makeDeposit(otherAccount.address, 3000)).to.emit(
+    const { banking,owner, otherAccount } = await loadFixture(deployBankingFixture);
+    expect(await banking.makeTransfer(owner,otherAccount.address, 3000)).to.emit(
       banking,
-      "Deposited"
+      "Transferred"
     );
   });
 
